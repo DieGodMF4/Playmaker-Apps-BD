@@ -2,7 +2,9 @@ from pathlib import Path
 import requests
 from .line_reader import read_content
 
+
 current_book_id = 0
+
 
 def crawler():
     global current_book_id
