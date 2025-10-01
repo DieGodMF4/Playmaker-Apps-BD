@@ -1,6 +1,6 @@
 import requests
 
-from .line_reader import read_content
+from line_reader import read_content
 
 current_book_id = 0
 def crawler():
