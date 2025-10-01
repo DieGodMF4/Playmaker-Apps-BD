@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="982cd37c-63de-4b1a-8daf-2e8e9eb3ac25" name="Changes" comment="Working test">
-      <change afterPath="$PROJECT_DIR$/.idea/Playmaker-Apps-BD.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SearchEngine/__init__.py" afterDir="false" />
+    <list default="true" id="982cd37c-63de-4b1a-8daf-2e8e9eb3ac25" name="Changes" comment="Making main">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SearchEngine/crawler/crawler.py" beforeDir="false" afterPath="$PROJECT_DIR$/SearchEngine/crawler/crawler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SearchEngine/crawler/downloader.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +21,20 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "rafasuarezs"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="6b50aca4-cc5a-4da7-9441-a41f53b7418d" />
+        <option name="url" value="https://github.com/DieGodMF4/Playmaker-Apps-BD-.git" />
+      </UrlAndAccount>
+    </option>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -115,7 +125,23 @@
       <option name="project" value="LOCAL" />
       <updated>1759339136520</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Working test">
+      <option name="closed" value="true" />
+      <created>1759341066760</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1759341066760</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Making main">
+      <option name="closed" value="true" />
+      <created>1759341124467</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1759341124467</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -134,6 +160,7 @@
     <MESSAGE value="Structure updated" />
     <MESSAGE value="Revert &quot;Working test&quot;&#10;&#10;This reverts commit a7daaf0e69ed936be24cb31d4790bf6fe6de6e3d." />
     <MESSAGE value="Working test" />
-    <option name="LAST_COMMIT_MESSAGE" value="Working test" />
+    <MESSAGE value="Making main" />
+    <option name="LAST_COMMIT_MESSAGE" value="Making main" />
   </component>
 </project>
