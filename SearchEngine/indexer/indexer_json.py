@@ -5,7 +5,7 @@ from collections import defaultdict
 from .utils import tokenize
 
 def build_index(datalake_path: Path, output_file: Path) -> object:
-    """Builds an inverted index from .body .txt files from datalake and stores it as JSON"""
+    """Builds an inverted index from .txt files from datalake and stores it as JSON"""
     inverted_index = defaultdict(set)
 
     for book_path in datalake_path.rglob("*.txt"):
