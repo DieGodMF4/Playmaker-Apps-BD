@@ -1,255 +1,214 @@
+# benchmarks/indexer_bench.py
 """
-Benchmark: Comparación de rendimiento entre tres enfoques de índice invertido (solo en memoria):
-1. JSON (estructura Python en memoria)
-2. SQLite (base temporal en memoria)
-3. MongoDB (colección temporal)
+4.2 Inverted Index Benchmark
 
-Carga:
-- Textos desde el datalake
-- Metadatos desde SQLite y MongoDB (si existen)
+Compara tres estrategias:
+1) Single Monolithic File (JSON en memoria)
+2) SQLite (en memoria)
+3) MongoDB (colección temporal)
 
 Mide:
-- Indexing speed (tiempo total de construcción)
-- Query performance (tiempo promedio de consultas)
-- Scalability (cómo cambia con el número de libros y términos)
+- Build time del índice
+- Query performance (postings de ~50 términos frecuentes)
+- Escalabilidad (nº de documentos)
+
+Resultados: SOLO por pantalla. No se crean archivos.
+Funciona desde cualquier carpeta: resuelve rutas y hace fallback si no encuentra 'src'.
 """
 
+from pathlib import Path
+import sys
 import time
 import json
-import sqlite3
-import random
-import statistics
 import logging
-from pathlib import Path
-from collections import defaultdict
+from collections import defaultdict, Counter
+from typing import List, Dict, Set
+import random
+import os
 
-from src.search_project.utils.text_utils import tokenize
+# --- Localiza la raíz del proyecto aunque ejecutes desde otra carpeta ---
+THIS_FILE = Path(__file__).resolve()
+PROJECT_ROOT = THIS_FILE.parents[1]            # .../Playmaker-Apps-BD-/
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Import de tokenize con fallback por ruta si no existe el paquete
+try:
+    from src.search_project.utils.text_utils import tokenize  # type: ignore
+except Exception:
+    import importlib.util
+    utils_path = PROJECT_ROOT / "src" / "search_project" / "utils" / "text_utils.py"
+    spec = importlib.util.spec_from_file_location("text_utils_fallback", utils_path)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader, f"No se pudo cargar {utils_path}"
+    spec.loader.exec_module(mod)  # type: ignore
+    tokenize = mod.tokenize  # type: ignore
 
 try:
-    from pymongo import MongoClient
-    MONGO_AVAILABLE = True
+    from pymongo import MongoClient, UpdateOne  # type: ignore
+    HAS_PYMONGO = True
 except Exception:
-    MONGO_AVAILABLE = False
+    HAS_PYMONGO = False
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATALAKE = PROJECT_ROOT / "data" / "datalake"
-DATAMART = PROJECT_ROOT / "data" / "datamarts"
 
+def collect_bodies(limit_docs: int | None = None) -> List[Path]:
+    paths = sorted(DATALAKE.rglob("*.body.txt"))
+    if limit_docs:
+        paths = paths[:limit_docs]
+    return paths
 
-# --- Utilidades generales ---
-def load_books_from_datalake(limit=None):
-    """Lee libros del datalake y devuelve [(book_id, text)]"""
-    books = []
-    for p in sorted(DATALAKE.rglob("*.body.txt")):
+def build_inverted(paths: List[Path]) -> Dict[str, Set[str]]:
+    inv: Dict[str, Set[str]] = defaultdict(set)
+    for p in paths:
+        book_id = p.stem.split(".")[0]
         try:
             text = p.read_text(encoding="utf-8")
-            books.append((p.stem.split(".")[0], text))
-            if limit and len(books) >= limit:
-                break
-        except Exception as e:
-            logging.warning(f"Error leyendo {p}: {e}")
-    return books
-
-
-def load_metadata_sqlite():
-    """Carga metadatos desde SQLite si existe el archivo."""
-    db_path = DATAMART / "metadata.sqlite"
-    if not db_path.exists():
-        logging.warning("No se encontró metadata.sqlite")
-        return []
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
-    cur.execute("SELECT book_id, title, author, language, body_path FROM books")
-    rows = cur.fetchall()
-    conn.close()
-    return rows
-
-
-def load_metadata_mongo():
-    """Carga metadatos desde MongoDB si está disponible."""
-    if not MONGO_AVAILABLE:
-        logging.warning("MongoDB no disponible.")
-        return []
-    try:
-        client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=2000)
-        db = client["search_engine"]
-        col = db["books_metadata"]
-        docs = list(col.find({}, {"_id": 0}))
-        client.close()
-        return docs
-    except Exception as e:
-        logging.warning(f"No se pudo conectar a MongoDB: {e}")
-        return []
-
-
-def build_inverted_index(docs):
-    """Construye un índice invertido {term -> set(book_id)}"""
-    inverted = defaultdict(set)
-    for book_id, text in docs:
+        except Exception:
+            continue
         for w in tokenize(text, remove_stopwords=True):
-            inverted[w].add(book_id)
-    return inverted
+            inv[w].add(str(book_id))
+    return inv
 
+def pick_terms(inverted: Dict[str, Set[str]], k: int = 50) -> List[str]:
+    cnt = Counter({t: len(ids) for t, ids in inverted.items()})
+    return [t for t, _ in cnt.most_common(k)] or list(cnt.keys())[:k]
 
-def representative_queries(inverted, n=5):
-    """Selecciona n términos aleatorios del índice para medir consultas."""
-    terms = list(inverted.keys())
-    if not terms:
+# ----------------------
+# JSON (en memoria)
+# ----------------------
+def build_json_index(inverted: Dict[str, Set[str]]):
+    rows = [{"term": t, "postings": sorted(list(ids))} for t, ids in inverted.items()]
+    return {row["term"]: row["postings"] for row in rows}
+
+def query_json_terms(index: Dict[str, List[str]], terms: List[str]) -> float:
+    t0 = time.perf_counter()
+    for t in terms:
+        _ = index.get(t, [])
+    return time.perf_counter() - t0
+
+# ----------------------
+# SQLite (en memoria)
+# ----------------------
+def build_sqlite_index(inverted: Dict[str, Set[str]]):
+    import sqlite3
+    con = sqlite3.connect(":memory:")
+    cur = con.cursor()
+    cur.execute("""
+        CREATE TABLE inverted (
+            term TEXT PRIMARY KEY,
+            postings TEXT
+        );
+    """)
+    cur.execute("CREATE INDEX idx_term ON inverted(term);")
+    rows = [(t, json.dumps(sorted(list(ids)))) for t, ids in inverted.items()]
+    cur.executemany("INSERT INTO inverted(term, postings) VALUES (?, ?)", rows)
+    con.commit()
+    return con
+
+def query_sqlite_terms(con, terms: List[str]) -> float:
+    cur = con.cursor()
+    t0 = time.perf_counter()
+    for t in terms:
+        cur.execute("SELECT postings FROM inverted WHERE term = ?", (t,))
+        cur.fetchone()
+    return time.perf_counter() - t0
+
+# ----------------------
+# MongoDB (colección temporal)
+# ----------------------
+def build_mongo_index(inverted: Dict[str, Set[str]]):
+    if not HAS_PYMONGO:
+        raise RuntimeError("MongoDB no disponible.")
+    import uuid
+    client = MongoClient(os.getenv("MONGODB_URI", "mongodb://localhost:27017"), serverSelectionTimeoutMS=2000)  # type: ignore
+    db = client[os.getenv("MONGODB_DB", "bench_search")]
+    col_name = f"bench_inverted_{uuid.uuid4().hex[:8]}"
+    col = db[col_name]
+    col.create_index("term", unique=True)
+    ops = []
+    for term, ids in inverted.items():
+        ops.append(UpdateOne({"term": term},
+                             {"$set": {"postings": sorted(list(ids))}},
+                             upsert=True))
+    if ops:
+        col.bulk_write(ops, ordered=False)
+    return client, col
+
+def query_mongo_terms(col, terms: List[str]) -> float:
+    t0 = time.perf_counter()
+    for t in terms:
+        col.find_one({"term": t}, {"_id": 0, "postings": 1})
+    return time.perf_counter() - t0
+
+# ----------------------
+# Caso de prueba
+# ----------------------
+def run_case(n_docs: int) -> List[dict]:
+    paths = collect_bodies(n_docs)
+    if not paths:
         return []
-    return random.sample(terms, min(n, len(terms)))
+    inverted = build_inverted(paths)
+    terms = pick_terms(inverted, k=min(50, max(5, len(inverted)//100)))
 
-
-# --- BENCHMARKS ---
-def benchmark_json(docs, runs=10):
-    """Mide rendimiento del índice invertido en memoria tipo JSON"""
-    times_index = []
-    times_query = []
-
-    for _ in range(runs):
-        t0 = time.time()
-        inverted = build_inverted_index(docs)
-        times_index.append(time.time() - t0)
-
-        queries = representative_queries(inverted)
-        q_times = []
-        for q in queries:
-            start = time.time()
-            _ = inverted.get(q, [])
-            q_times.append(time.time() - start)
-        if q_times:
-            times_query.append(statistics.mean(q_times))
-
-    return {
-        "engine": "json",
-        "index_time": statistics.mean(times_index),
-        "avg_query_time": statistics.mean(times_query) if times_query else 0.0,
-        "num_books": len(docs),
-        "num_terms": len(inverted),
-    }
-
-
-def benchmark_sqlite(docs, runs=10):
-    """Benchmark en memoria con SQLite"""
-    times_index = []
-    times_query = []
-
-    for _ in range(runs):
-        inverted = build_inverted_index(docs)
-        conn = sqlite3.connect(":memory:")
-        cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE inverted (
-                term TEXT PRIMARY KEY,
-                postings TEXT
-            )
-        """)
-
-        t0 = time.time()
-        for term, ids in inverted.items():
-            cur.execute("INSERT INTO inverted VALUES (?, ?)", (term, json.dumps(sorted(list(ids)))))
-        conn.commit()
-        times_index.append(time.time() - t0)
-
-        queries = representative_queries(inverted)
-        q_times = []
-        for q in queries:
-            start = time.time()
-            cur.execute("SELECT postings FROM inverted WHERE term = ?", (q,))
-            _ = cur.fetchone()
-            q_times.append(time.time() - start)
-        if q_times:
-            times_query.append(statistics.mean(q_times))
-        conn.close()
-
-    return {
-        "engine": "sqlite",
-        "index_time": statistics.mean(times_index),
-        "avg_query_time": statistics.mean(times_query) if times_query else 0.0,
-        "num_books": len(docs),
-        "num_terms": len(inverted),
-    }
-
-
-def benchmark_mongo(docs, runs=10):
-    """Benchmark temporal con MongoDB"""
-    if not MONGO_AVAILABLE:
-        return {"engine": "mongodb", "error": "MongoDB no disponible"}
-
-    try:
-        client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=2000)
-        db = client["search_engine"]
-        col = db["temp_inverted_index"]
-        times_index = []
-        times_query = []
-
-        for _ in range(runs):
-            col.drop()
-            col.create_index("term", unique=True)
-            inverted = build_inverted_index(docs)
-
-            t0 = time.time()
-            for term, ids in inverted.items():
-                col.insert_one({"term": term, "postings": sorted(list(ids))})
-            times_index.append(time.time() - t0)
-
-            queries = representative_queries(inverted)
-            q_times = []
-            for q in queries:
-                start = time.time()
-                col.find_one({"term": q}, {"_id": 0})
-                q_times.append(time.time() - start)
-            if q_times:
-                times_query.append(statistics.mean(q_times))
-
-        client.close()
-        return {
-            "engine": "mongodb",
-            "index_time": statistics.mean(times_index),
-            "avg_query_time": statistics.mean(times_query) if times_query else 0.0,
-            "num_books": len(docs),
-            "num_terms": len(inverted),
-        }
-    except Exception as e:
-        return {"engine": "mongodb", "error": str(e)}
-
-
-# --- MAIN ---
-if __name__ == "__main__":
-    logging.info("Cargando libros reales desde datalake...")
-    books = load_books_from_datalake(limit=None)
-    if not books:
-        logging.warning("No se encontraron libros. Ejecuta run_pipeline.py primero.")
-        exit(0)
-
-    logging.info("Cargando metadatos desde SQLite y MongoDB (si existen)...")
-    metadata_sqlite = load_metadata_sqlite()
-    metadata_mongo = load_metadata_mongo()
-    logging.info(f"SQLite: {len(metadata_sqlite)} registros | MongoDB: {len(metadata_mongo)} registros")
-
-    sizes = [5, 10, 20, 40, len(books)]
     results = []
 
-    for size in sizes:
-        subset = books[:min(size, len(books))]
-        logging.info(f"=== Benchmark con {len(subset)} libros ===")
-        res_sqlite = benchmark_sqlite(subset)
-        res_mongo = benchmark_mongo(subset)
-        res_json = benchmark_json(subset)
-        results.extend([res_sqlite, res_mongo, res_json])
+    # JSON
+    t0 = time.perf_counter()
+    json_index = build_json_index(inverted)
+    build_time = time.perf_counter() - t0
+    q_time = query_json_terms(json_index, terms)
+    results.append({"engine": "JSON", "docs": n_docs, "build_s": build_time, "query_50_terms_s": q_time})
 
-    # --- Imprimir resumen ---
-    print("\n========= BENCHMARK RESULTS =========")
-    print(f"{'Engine':<10} {'Books':<6} {'Terms':<8} {'IndexTime(s)':<15} {'AvgQuery(s)':<12}")
-    print("-" * 60)
-    for r in results:
+    # SQLite
+    t0 = time.perf_counter()
+    sqlite_con = build_sqlite_index(inverted)
+    build_time = time.perf_counter() - t0
+    q_time = query_sqlite_terms(sqlite_con, terms)
+    results.append({"engine": "SQLite", "docs": n_docs, "build_s": build_time, "query_50_terms_s": q_time})
+    sqlite_con.close()
+
+    # Mongo
+    try:
+        t0 = time.perf_counter()
+        client, col = build_mongo_index(inverted)
+        build_time = time.perf_counter() - t0
+        q_time = query_mongo_terms(col, terms)
+        results.append({"engine": "MongoDB", "docs": n_docs, "build_s": build_time, "query_50_terms_s": q_time})
+        # limpieza
+        col.drop()
+        client.close()
+    except Exception as e:
+        results.append({"engine": "MongoDB", "docs": n_docs, "error": str(e)})
+
+    return results
+
+def main():
+    random.seed(42)
+    total_docs = len(collect_bodies())
+    if total_docs == 0:
+        print(f"No hay documentos en {DATALAKE}")
+        return
+
+    sizes = [100, 500, 1000, 2000, 5000]
+    sizes = [n for n in sizes if n <= total_docs] or [min(100, total_docs)]
+
+    all_results: List[dict] = []
+    for n in sizes:
+        all_results.extend(run_case(n))
+
+    # Mostrar por pantalla
+    print("\n========= INVERTED INDEX BENCHMARK =========")
+    print(f"{'Engine':<10} {'Docs':<8} {'Build(s)':<12} {'Query50(s)':<12}")
+    print("-"*50)
+    for r in all_results:
         if "error" in r:
-            print(f"{r['engine']:<10} ERROR: {r['error']}")
+            print(f"{r['engine']:<10} {r['docs']:<8} ERROR: {r['error']}")
         else:
-            print(f"{r['engine']:<10} {r['num_books']:<6} {r['num_terms']:<8} "
-                  f"{r['index_time']:<15.8f} {r['avg_query_time']:<12.8f}")
-    print("=====================================\n")
+            print(f"{r['engine']:<10} {r['docs']:<8} {r['build_s']:<12.6f} {r['query_50_terms_s']:<12.6f}")
+    print("============================================\n")
 
-    logging.info("Benchmark completo sin archivos persistentes.")
+if __name__ == "__main__":
+    main()

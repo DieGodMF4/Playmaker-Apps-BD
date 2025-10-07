@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="982cd37c-63de-4b1a-8daf-2e8e9eb3ac25" name="Changes" comment="Database benchmark">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+    <list default="true" id="982cd37c-63de-4b1a-8daf-2e8e9eb3ac25" name="Changes" comment="Corrected indexer_db.py to parse correctly the json file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/search_project/indexer/indexer_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_project/indexer/indexer_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/benchmarks/indexer_bench.py" beforeDir="false" afterPath="$PROJECT_DIR$/benchmarks/indexer_bench.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/benchmarks/metadata_bench.py" beforeDir="false" afterPath="$PROJECT_DIR$/benchmarks/metadata_bench.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_pipeline.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +83,7 @@
       <recent name="$PROJECT_DIR$/SearchEngine" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.run_pipeline">
+  <component name="RunManager">
     <configuration name="indexer_bench" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Playmaker-Apps-BD-" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -236,7 +237,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759839496881</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Corrected indexer_db.py to parse correctly the json file">
+      <option name="closed" value="true" />
+      <created>1759862854492</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1759862854493</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -259,15 +268,18 @@
     <MESSAGE value="Revert &quot;Working test&quot;&#10;&#10;This reverts commit a7daaf0e69ed936be24cb31d4790bf6fe6de6e3d." />
     <MESSAGE value="Working test" />
     <MESSAGE value="Making main" />
-    <MESSAGE value="Implemented sqlite" />
     <MESSAGE value="Database benchmark" />
-    <option name="LAST_COMMIT_MESSAGE" value="Database benchmark" />
+    <MESSAGE value="Mongo and Sqlite inverted index" />
+    <MESSAGE value="Implemented sqlite" />
+    <MESSAGE value="Corrected indexer_db.py to parse correctly the json file" />
+    <option name="LAST_COMMIT_MESSAGE" value="Corrected indexer_db.py to parse correctly the json file" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Playmaker_Apps_BD_$run_pipeline.coverage" NAME="run_pipeline Coverage Results" MODIFIED="1759861905006" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Playmaker_Apps_BD_$run_pipeline.coverage" NAME="run_pipeline Coverage Results" MODIFIED="1759864459759" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/run_pipeline_py$run_pipeline.coverage" NAME="run_pipeline Coverage Results" MODIFIED="1759829222227" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/run_pipeline_py$indexer_mongo.coverage" NAME="indexer_mongo Coverage Results" MODIFIED="1759831402780" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/search_project/indexer" />
     <SUITE FILE_PATH="coverage/run_pipeline_py$metadata_bench.coverage" NAME="metadata_bench Coverage Results" MODIFIED="1759839074676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/benchmarks" />
+    <SUITE FILE_PATH="coverage/Playmaker_Apps_BD_$metadata_bench.coverage" NAME="metadata_bench Coverage Results" MODIFIED="1759865701117" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/benchmarks" />
     <SUITE FILE_PATH="coverage/run_pipeline_py$mongo.coverage" NAME="mongo Coverage Results" MODIFIED="1759831397672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/search_project/db" />
     <SUITE FILE_PATH="coverage/run_pipeline_py$db_bench.coverage" NAME="db_bench Coverage Results" MODIFIED="1759838096883" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/benchmarks" />
     <SUITE FILE_PATH="coverage/Playmaker_Apps_BD_$indexer_json.coverage" NAME="indexer_json Coverage Results" MODIFIED="1759495596928" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/SearchEngine/indexer" />

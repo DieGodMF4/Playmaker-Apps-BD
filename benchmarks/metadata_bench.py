@@ -1,263 +1,200 @@
-import time
-import sqlite3
-import random
-import statistics
-import logging
+# benchmarks/metadata_bench.py
+"""
+Database Engine Comparison (METADATA layer)
+- SQLite (en memoria)
+- MongoDB (opcional, si está disponible)
+
+Mide:
+1) Velocidad de inserción
+2) Rendimiento de consultas:
+   - Buscar libros por autor
+   - Recuperar body_path por book_id
+3) Escalabilidad: tamaños crecientes
+
+Resultados: SOLO por pantalla. No se crea ningún archivo.
+Fuente de datos: data/datamarts/metadata.sqlite (tabla books), resuelta desde la raíz del proyecto.
+"""
+
 from pathlib import Path
+import sys
+import os
+import random
+import sqlite3
+import time
+import logging
+from typing import List, Dict, Any, Tuple
+
+# --- Localiza la raíz del proyecto aunque ejecutes desde otra carpeta ---
+THIS_FILE = Path(__file__).resolve()
+PROJECT_ROOT = THIS_FILE.parents[1]            # .../Playmaker-Apps-BD-/
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
-    from pymongo import MongoClient
-    MONGO_AVAILABLE = True
+    from pymongo import MongoClient  # type: ignore
+    HAS_MONGO = True
 except Exception:
-    MONGO_AVAILABLE = False
+    HAS_MONGO = False
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATAMART = PROJECT_ROOT / "data" / "datamarts"
-META_DB_SQLITE = DATAMART / "metadata.sqlite"
+SRC_SQLITE = PROJECT_ROOT / "data" / "datamarts" / "metadata.sqlite"
 
+# -------------------------
+# Helpers de carga
+# -------------------------
+def load_source(limit: int | None = None) -> List[Dict[str, Any]]:
+    if not SRC_SQLITE.exists():
+        raise FileNotFoundError(f"No existe {SRC_SQLITE}. Ejecuta el pipeline primero.")
+    con = sqlite3.connect(SRC_SQLITE)
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+    q = "SELECT book_id, title, author, language, body_path FROM books"
+    if limit:
+        q += f" LIMIT {int(limit)}"
+    rows = [dict(r) for r in cur.execute(q)]
+    con.close()
+    return rows
 
-# --- UTILIDADES ---
-def load_metadata_from_sqlite():
-    """Carga metadatos reales desde el archivo metadata.sqlite."""
-    if not META_DB_SQLITE.exists():
-        raise FileNotFoundError(f"No se encontró {META_DB_SQLITE}")
-    conn = sqlite3.connect(META_DB_SQLITE)
-    cur = conn.cursor()
-    cur.execute("SELECT book_id, title, author, language, body_path FROM books")
-    records = cur.fetchall()
-    conn.close()
-    return [
-        {"book_id": r[0], "title": r[1], "author": r[2], "language": r[3], "body_path": r[4]}
-        for r in records
-    ]
+def subset(rows: List[Dict[str, Any]], n: int) -> List[Dict[str, Any]]:
+    if n >= len(rows):
+        return rows
+    return random.sample(rows, n)
 
-
-def load_metadata_from_mongo():
+# -------------------------
+# SQLite (EN MEMORIA)
+# -------------------------
+def bench_sqlite(rows: List[Dict[str, Any]]) -> Tuple[float, float, float]:
     """
-    Intenta cargar metadatos desde MongoDB.
-    Busca en la base 'metadata_db' y selecciona una colección sensible ('books' si existe,
-    o la primera colección disponible). No crea/insertar nuevas colecciones.
-    Devuelve lista de dicts con keys: book_id, title, author, language, body_path
+    Devuelve: (insert_time_s, avg_author_query_s, avg_id_query_s)
     """
-    if not MONGO_AVAILABLE:
-        logging.warning("pymongo no disponible: no se cargarán metadatos desde MongoDB.")
-        return []
-
-    try:
-        client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=2000)
-        # Intentamos la base 'metadata_db' tal como en tu código original
-        db = client["metadata_db"]
-        cols = db.list_collection_names()
-        if not cols:
-            logging.warning("metadata_db existe pero no contiene colecciones. No se cargan metadatos desde MongoDB.")
-            client.close()
-            return []
-
-        # Preferimos una colección llamada 'books' si existe
-        col_name = None
-        for c in cols:
-            if "book" in c.lower():
-                col_name = c
-                break
-        if not col_name:
-            col_name = cols[0]
-
-        col = db[col_name]
-        # Intentamos traer campos esperados; si no están, tomamos lo que haya y mapeamos
-        docs = list(col.find({}, {"_id": 1, "book_id": 1, "title": 1, "author": 1, "language": 1, "body_path": 1}))
-        records = []
-        for d in docs:
-            records.append({
-                "book_id": d.get("book_id", str(d.get("_id"))),
-                "title": d.get("title", "") or "",
-                "author": d.get("author", "") or "",
-                "language": d.get("language", "") or "",
-                "body_path": d.get("body_path", "") or "",
-            })
-        client.close()
-        return records
-    except Exception as e:
-        logging.warning(f"No se pudo conectar a MongoDB o leer colecciones: {e}")
-        return []
-
-
-def subset(records, n):
-    """Devuelve los primeros n registros o todos si n excede el tamaño."""
-    return records[:min(n, len(records))]
-
-
-# --- BENCHMARK: SQLite (NO se crea archivo en disco) ---
-def benchmark_sqlite(records):
-    """
-    Inserta en una base SQLite en memoria y mide tiempos de inserción y consultas.
-    No crea archivos en disco.
-    """
-    conn = sqlite3.connect(":memory:")  # en memoria -> sin persistencia
-    cur = conn.cursor()
+    con = sqlite3.connect(":memory:")
+    cur = con.cursor()
     cur.execute("""
-        CREATE TABLE books (
+        CREATE TABLE books(
             book_id INTEGER PRIMARY KEY,
-            title TEXT,
-            author TEXT,
-            language TEXT,
-            body_path TEXT
-        )
+            title TEXT, author TEXT, language TEXT, body_path TEXT
+        );
     """)
+    cur.execute("CREATE INDEX idx_books_author ON books(author);")
+    con.commit()
 
-    # Inserción (medida)
-    t0 = time.time()
+    t0 = time.perf_counter()
     cur.executemany(
-        "INSERT INTO books (book_id, title, author, language, body_path) VALUES (?, ?, ?, ?, ?)",
-        [(r["book_id"], r["title"], r["author"], r["language"], r["body_path"]) for r in records]
+        "INSERT INTO books(book_id, title, author, language, body_path) VALUES (?,?,?,?,?)",
+        [(r["book_id"], r["title"], r["author"], r["language"], r["body_path"]) for r in rows]
     )
-    conn.commit()
-    insert_time = time.time() - t0
+    con.commit()
+    t_insert = time.perf_counter() - t0
 
-    # Query performance (muestreo)
-    sample_authors = random.sample([r["author"] for r in records if r["author"]], min(5, len(records)))
-    sample_titles = random.sample([r["title"] for r in records if r["title"]], min(5, len(records)))
-    sample_ids = random.sample([r["book_id"] for r in records], min(5, len(records)))
+    # Queries
+    authors = [r["author"] for r in subset(rows, min(50, len(rows)))]
+    ids = [r["book_id"] for r in subset(rows, min(200, len(rows)))]
 
-    q_times = []
-    for a in sample_authors:
-        start = time.time()
-        cur.execute("SELECT * FROM books WHERE author = ?", (a,))
-        cur.fetchall()
-        q_times.append(time.time() - start)
+    t0 = time.perf_counter()
+    for a in authors:
+        list(cur.execute("SELECT book_id FROM books WHERE author = ?", (a,)).fetchall())
+    t_author = (time.perf_counter() - t0) / max(1, len(authors))
 
-    for t in sample_titles:
-        start = time.time()
-        cur.execute("SELECT body_path FROM books WHERE title = ?", (t,))
-        cur.fetchall()
-        q_times.append(time.time() - start)
+    t0 = time.perf_counter()
+    for i in ids:
+        cur.execute("SELECT body_path FROM books WHERE book_id = ?", (i,))
+        cur.fetchone()
+    t_id = (time.perf_counter() - t0) / max(1, len(ids))
 
-    for i in sample_ids:
-        start = time.time()
-        cur.execute("SELECT title FROM books WHERE book_id = ?", (i,))
-        cur.fetchall()
-        q_times.append(time.time() - start)
+    con.close()
+    return t_insert, t_author, t_id
 
-    query_time = statistics.mean(q_times) if q_times else 0.0
-    conn.close()
+# -------------------------
+# MongoDB (colección temporal)
+# -------------------------
+def bench_mongo(rows: List[Dict[str, Any]]) -> Tuple[float, float, float]:
+    if not HAS_MONGO:
+        raise RuntimeError("MongoDB/pymongo no disponible.")
+    import uuid
+    client = MongoClient(os.getenv("MONGODB_URI", "mongodb://localhost:27017"), serverSelectionTimeoutMS=2000)  # type: ignore
+    db = client[os.getenv("MONGODB_DB", "bench_search")]
+    col_name = f"bench_books_{uuid.uuid4().hex[:8]}"
+    col = db[col_name]
+    col.create_index("author")
+    col.create_index("book_id", unique=True)
 
-    return {
-        "engine": "sqlite",
-        "records": len(records),
-        "insert_time": insert_time,
-        "avg_query_time": query_time,
-    }
+    # Inserción
+    t0 = time.perf_counter()
+    docs = [{
+        "book_id": int(r["book_id"]),
+        "title": r["title"],
+        "author": r["author"],
+        "language": r["language"],
+        "body_path": r["body_path"]
+    } for r in rows]
+    if docs:
+        col.insert_many(docs, ordered=False)
+    t_insert = time.perf_counter() - t0
 
+    # Queries
+    authors = [r["author"] for r in subset(rows, min(50, len(rows)))]
+    ids = [int(r["book_id"]) for r in subset(rows, min(200, len(rows)))]
 
-# --- BENCHMARK: MongoDB (NO crea colección nueva; opera en memoria) ---
-def benchmark_mongo(records):
-    """
-    Realiza el benchmark de 'inserción' y consultas sobre los registros ya cargados
-    desde MongoDB, pero sin crear colecciones ni persistir nada.
-    - La 'inserción' se simula con una copia a lista (operación en memoria).
-    - Las consultas se simulan con comprensión de listas sobre la estructura en memoria.
-    """
-    if not records:
-        return {"engine": "mongodb", "error": "No hay metadatos cargados desde MongoDB"}
+    t0 = time.perf_counter()
+    for a in authors:
+        list(col.find({"author": a}, {"_id": 0, "book_id": 1}))
+    t_author = (time.perf_counter() - t0) / max(1, len(authors))
 
-    # Simulamos la inserción (copia en memoria) y medimos el coste
-    t0 = time.time()
-    in_memory_collection = list(records)
-    insert_time = time.time() - t0
+    t0 = time.perf_counter()
+    for i in ids:
+        col.find_one({"book_id": i}, {"_id": 0, "body_path": 1})
+    t_id = (time.perf_counter() - t0) / max(1, len(ids))
 
-    # Query performance (simulado vía búsquedas en lista)
-    sample_authors = random.sample([r["author"] for r in records if r["author"]], min(5, len(records)))
-    sample_titles = random.sample([r["title"] for r in records if r["title"]], min(5, len(records)))
-    sample_ids = random.sample([r["book_id"] for r in records], min(5, len(records)))
+    # Limpieza (no persistir nada)
+    col.drop()
+    client.close()
+    return t_insert, t_author, t_id
 
-    q_times = []
-    for a in sample_authors:
-        start = time.time()
-        [r for r in in_memory_collection if r.get("author") == a]
-        q_times.append(time.time() - start)
+# -------------------------
+# Runner
+# -------------------------
+def main():
+    random.seed(42)
+    all_rows = load_source()
+    total = len(all_rows)
+    if total == 0:
+        print("No hay filas en metadata.sqlite:books")
+        return
 
-    for t in sample_titles:
-        start = time.time()
-        [r.get("body_path") for r in in_memory_collection if r.get("title") == t]
-        q_times.append(time.time() - start)
-
-    for i in sample_ids:
-        start = time.time()
-        [r.get("title") for r in in_memory_collection if r.get("book_id") == i]
-        q_times.append(time.time() - start)
-
-    query_time = statistics.mean(q_times) if q_times else 0.0
-
-    return {
-        "engine": "mongodb",
-        "records": len(records),
-        "insert_time": insert_time,
-        "avg_query_time": query_time,
-    }
-
-
-# --- MAIN ---
-if __name__ == "__main__":
-    # Cargar metadatos desde SQLite (archivo)
-    logging.info("Cargando metadatos desde SQLite (archivo)...")
-    try:
-        metadata_sqlite = load_metadata_from_sqlite()
-        logging.info(f"Metadatos cargados desde SQLite: {len(metadata_sqlite)} registros.")
-    except Exception as e:
-        logging.warning(f"No se pudo cargar metadata desde SQLite: {e}")
-        metadata_sqlite = []
-
-    # Cargar metadatos desde MongoDB (si es posible)
-    logging.info("Intentando cargar metadatos desde MongoDB...")
-    metadata_mongo = load_metadata_from_mongo()
-    if metadata_mongo:
-        logging.info(f"Metadatos cargados desde MongoDB: {len(metadata_mongo)} registros.")
-    else:
-        logging.info("No se cargaron metadatos desde MongoDB (no disponible o vacío).")
-
-    if not metadata_sqlite and not metadata_mongo:
-        logging.warning("No hay metadatos disponibles desde SQLite ni desde MongoDB. Ejecuta run_pipeline.py o revisa las fuentes.")
-        exit(0)
+    sizes = [100, 1000, 5000, 10000]
+    sizes = [n for n in sizes if n <= total] or [min(100, total)]
 
     results = []
+    engines = [("SQLite", bench_sqlite)]
+    if HAS_MONGO:
+        engines.append(("MongoDB", bench_mongo))
 
-    # Benchmarks para los datos provenientes de SQLite (si existen)
-    if metadata_sqlite:
-        sizes = [100, 500, 1000, 2000, len(metadata_sqlite)]
-        for size in sizes:
-            subset_records = subset(metadata_sqlite, size)
-            logging.info(f"=== Benchmark (SQLite source) con {len(subset_records)} registros ===")
-            res_sqlite = benchmark_sqlite(subset_records)
-            # Para Mongo benchmark aquí usamos los datos de Mongo; no crear nada en Mongo
-            # Si no hay metadata_mongo, simulamos benchmark_mongo sobre los mismos registros
-            if metadata_mongo:
-                res_mongo = benchmark_mongo(subset(metadata_mongo, size))
-            else:
-                # Si no hay metadata en Mongo, medir el comportamiento simulado sobre los mismos datos
-                res_mongo = benchmark_mongo(subset_records)
-            results.extend([res_sqlite, res_mongo])
+    for n in sizes:
+        rows = subset(all_rows, n)
+        for name, fn in engines:
+            try:
+                ins, q_auth, q_id = fn(rows)
+                results.append({
+                    "engine": name,
+                    "records": n,
+                    "insert_time_s": ins,
+                    "avg_author_query_s": q_auth,
+                    "avg_id_query_s": q_id,
+                })
+            except Exception as e:
+                results.append({"engine": name, "records": n, "error": str(e)})
 
-    # Si había metadatos exclusivamente en Mongo (y no en SQLite), también los medimos
-    if metadata_mongo and not metadata_sqlite:
-        sizes = [100, 500, 1000, 2000, len(metadata_mongo)]
-        for size in sizes:
-            subset_records = subset(metadata_mongo, size)
-            logging.info(f"=== Benchmark (Mongo source) con {len(subset_records)} registros ===")
-            # SQLite benchmark se realiza en memoria con los mismos datos para comparar
-            res_sqlite = benchmark_sqlite(subset_records)
-            res_mongo = benchmark_mongo(subset_records)
-            results.extend([res_sqlite, res_mongo])
-
-    # --- RESUMEN FINAL ---
+    # Mostrar por pantalla
     print("\n========= METADATA BENCHMARK RESULTS =========")
-    print(f"{'Engine':<10} {'Records':<8} {'InsertTime(s)':<15} {'AvgQuery(s)':<12}")
-    print("-" * 55)
+    print(f"{'Engine':<10} {'Records':<8} {'Insert(s)':<12} {'Q(author)s':<12} {'Q(id)s':<12}")
+    print("-"*60)
     for r in results:
         if "error" in r:
-            print(f"{r['engine']:<10} ERROR: {r['error']}")
+            print(f"{r['engine']:<10} {r['records']:<8} ERROR: {r['error']}")
         else:
-            print(f"{r['engine']:<10} {r['records']:<8} {r['insert_time']:<15.8f} {r['avg_query_time']:<12.8f}")
-    print("=============================================\n")
+            print(f"{r['engine']:<10} {r['records']:<8} {r['insert_time_s']:<12.6f} {r['avg_author_query_s']:<12.6f} {r['avg_id_query_s']:<12.6f}")
+    print("==============================================\n")
 
-    logging.info("Benchmark de metadatos completado con éxito.")
+if __name__ == "__main__":
+    main()
