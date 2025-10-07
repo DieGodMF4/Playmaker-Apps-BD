@@ -4,174 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="982cd37c-63de-4b1a-8daf-2e8e9eb3ac25" name="Changes" comment="Implemented sqlite">
-      <change afterPath="$PROJECT_DIR$/benchmarks/metadata_bench.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/11356.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/11356.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/12142.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/12142.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/14606.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/14606.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/1638.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/1638.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/18214.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/18214.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/18322.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/18322.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/18475.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/18475.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/19052.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/19052.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/20471.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/20471.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/21347.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/21347.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/22211.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/22211.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/23415.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/23415.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/24406.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/24406.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/2570.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/2570.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/27652.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/27652.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/27886.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/27886.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/28082.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/28082.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/28534.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/28534.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/30181.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/30181.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/31677.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/31677.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/33301.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/33301.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/35636.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/35636.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/36902.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/36902.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/37414.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/37414.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/40512.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/40512.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/41637.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/41637.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/41711.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/41711.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/43092.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/43092.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/4434.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/4434.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/46793.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/46793.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/47709.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/47709.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/47948.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/47948.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/49981.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/49981.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/50757.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/50757.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/52572.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/52572.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/53552.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/53552.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/53819.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/53819.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/5433.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/5433.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/57324.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/57324.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/58621.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/58621.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/60552.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/60552.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/61723.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/61723.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/63387.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/63387.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/68218.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/68218.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/68634.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/68634.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/69551.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/69551.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/69864.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/69864.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/7582.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/7582.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/9189.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/9189.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/9321.body.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datalake/20251007/11/9321.header.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datamarts/inverted_index.sqlite" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datamarts/metadata.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/datamarts/metadata.sqlite" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/11356.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/12142.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/14606.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/1638.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/18214.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/18322.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/18475.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/19052.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/20471.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/21347.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/22211.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/23415.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/24406.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/2570.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/27652.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/27886.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/28082.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/28534.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/30181.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/31677.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/33301.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/35636.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/36902.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/37414.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/40512.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/41637.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/41711.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/43092.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/4434.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/46793.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/47709.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/47948.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/49981.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/50757.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/52572.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/53552.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/53819.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/5433.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/57324.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/58621.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/60552.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/61723.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/63387.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/68218.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/68634.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/69551.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/69864.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/7582.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/9189.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw/9321.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+    <list default="true" id="982cd37c-63de-4b1a-8daf-2e8e9eb3ac25" name="Changes" comment="Database benchmark">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/benchmarks/db_bench.py" beforeDir="false" afterPath="$PROJECT_DIR$/benchmarks/db_bench.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/control/downloaded_books.txt" beforeDir="false" afterPath="$PROJECT_DIR$/control/downloaded_books.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/control/indexed_books.txt" beforeDir="false" afterPath="$PROJECT_DIR$/control/indexed_books.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_pipeline.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/search_project/control/orchestrator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_project/control/orchestrator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/search_project/crawler/downloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_project/crawler/downloader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/search_project/indexer/indexer_core.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_project/indexer/indexer_core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/benchmarks/indexer_bench.py" beforeDir="false" afterPath="$PROJECT_DIR$/benchmarks/indexer_bench.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/benchmarks/metadata_bench.py" beforeDir="false" afterPath="$PROJECT_DIR$/benchmarks/metadata_bench.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/search_project/indexer/indexer_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_project/indexer/indexer_db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/search_project/metadata/metadata.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_project/metadata/metadata.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/search_project/utils/text_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_project/utils/text_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_downloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_downloader.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -218,6 +56,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "Python.db_bench.executor": "Run",
+    "Python.indexer_bench.executor": "Run",
     "Python.main.executor": "Run",
     "Python.metadata_bench.executor": "Run",
     "Python.run_pipeline.executor": "Run",
@@ -245,8 +84,8 @@
       <recent name="$PROJECT_DIR$/SearchEngine" />
     </key>
   </component>
-  <component name="RunManager">
-    <configuration name="db_bench" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.run_pipeline">
+    <configuration name="indexer_bench" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Playmaker-Apps-BD-" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -260,7 +99,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/benchmarks/db_bench.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\vituk\OneDrive\Escritorio\BigData\Playmaker-Apps-BD\benchmarks\indexer_bench.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -317,8 +156,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.db_bench" />
         <item itemvalue="Python.run_pipeline" />
+        <item itemvalue="Python.indexer_bench" />
         <item itemvalue="Python.main" />
       </list>
     </recent_temporary>
@@ -343,7 +182,8 @@
       <workItem from="1759601937988" duration="109000" />
       <workItem from="1759684888537" duration="1735000" />
       <workItem from="1759822289759" duration="2289000" />
-      <workItem from="1759824703135" duration="13678000" />
+      <workItem from="1759824703135" duration="14067000" />
+      <workItem from="1759849489534" duration="7034000" />
     </task>
     <task id="LOCAL-00001" summary="Working test">
       <option name="closed" value="true" />
@@ -393,7 +233,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759826143067</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Database benchmark">
+      <option name="closed" value="true" />
+      <created>1759839496881</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1759839496881</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -417,12 +265,14 @@
     <MESSAGE value="Working test" />
     <MESSAGE value="Making main" />
     <MESSAGE value="Implemented sqlite" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented sqlite" />
+    <MESSAGE value="Database benchmark" />
+    <option name="LAST_COMMIT_MESSAGE" value="Database benchmark" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/run_pipeline_py$db_bench.coverage" NAME="db_bench Coverage Results" MODIFIED="1759838096883" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/benchmarks" />
-    <SUITE FILE_PATH="coverage/run_pipeline_py$metadata_bench.coverage" NAME="metadata_bench Coverage Results" MODIFIED="1759839074676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/benchmarks" />
-    <SUITE FILE_PATH="coverage/run_pipeline_py$run_pipeline.coverage" NAME="run_pipeline Coverage Results" MODIFIED="1759837787335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/run_pipeline_py$indexer_bench.coverage" NAME="indexer_bench Coverage Results" MODIFIED="1759859283957" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/benchmarks" />
+    <SUITE FILE_PATH="coverage/run_pipeline_py$metadata_bench.coverage" NAME="metadata_bench Coverage Results" MODIFIED="1759858905238" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/benchmarks" />
+    <SUITE FILE_PATH="coverage/run_pipeline_py$run_pipeline.coverage" NAME="run_pipeline Coverage Results" MODIFIED="1759859555443" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/main_py$main.coverage" NAME="main Coverage Results" MODIFIED="1759684967160" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/SearchEngine/Runner" />
   </component>
 </project>

@@ -91,6 +91,11 @@ def build_index_from_paths(paths, datamart_root: Path = Path("data/datamarts")):
         for w in tokenize(text, remove_stopwords=True):
             inverted[w].add(book_id)
 
+    json_path = datamart_root / "inverted_index.json"
+    with open(json_path, "w", encoding="utf-8") as jf:
+        json.dump({t: sorted(list(ids)) for t, ids in inverted.items()}, jf, indent=2, ensure_ascii=False)
+    logging.info(f"[INDEXER] JSON index saved at {json_path}")
+
     sqlite_path = datamart_root / "inverted_index.sqlite"
     build_index_sqlite(inverted, sqlite_path)
     build_index_mongo(inverted)

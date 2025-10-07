@@ -12,6 +12,13 @@ TITLE_RE = re.compile(r"^\s*Title:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 AUTHOR_RE = re.compile(r"^\s*Author:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 LANG_RE = re.compile(r"^\s*Language:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 
+try:
+    from pymongo import MongoClient
+    MONGO_AVAILABLE = True
+except Exception:
+    MONGO_AVAILABLE = False
+
+
 def extract_basic(header: str):
     title = TITLE_RE.search(header)
     author = AUTHOR_RE.search(header)
@@ -21,6 +28,7 @@ def extract_basic(header: str):
         "author": author.group(1).strip() if author else "",
         "language": lang.group(1).strip() if lang else ""
     }
+
 
 def ensure_sqlite():
     conn = sqlite3.connect(META_DB)
@@ -37,18 +45,19 @@ def ensure_sqlite():
     conn.commit()
     return conn
 
+
 def save_metadata(book_id: int, meta: dict, body_path: Path):
-    # save to sqlite
+    # --- SQLite ---
     conn = ensure_sqlite()
     cur = conn.cursor()
     cur.execute(
         "INSERT OR REPLACE INTO books (book_id, title, author, language, body_path) VALUES (?, ?, ?, ?, ?)",
-        (book_id, meta.get("title",""), meta.get("author",""), meta.get("language",""), str(body_path))
+        (book_id, meta.get("title", ""), meta.get("author", ""), meta.get("language", ""), str(body_path))
     )
     conn.commit()
     conn.close()
 
-    # append to CSV for quick checks
+    # --- CSV ---
     META_CSV.parent.mkdir(parents=True, exist_ok=True)
     write_header = not META_CSV.exists()
     with open(META_CSV, "a", encoding="utf-8", newline="") as f:
@@ -56,6 +65,27 @@ def save_metadata(book_id: int, meta: dict, body_path: Path):
         if write_header:
             w.writerow(["book_id", "title", "author", "language", "body_path"])
         w.writerow([book_id, meta.get("title",""), meta.get("author",""), meta.get("language",""), str(body_path)])
+
+    # --- MongoDB ---
+    if MONGO_AVAILABLE:
+        try:
+            client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=2000)
+            db = client["search_engine"]
+            col = db["metadata"]
+            col.update_one(
+                {"book_id": book_id},
+                {"$set": {
+                    "title": meta.get("title", ""),
+                    "author": meta.get("author", ""),
+                    "language": meta.get("language", ""),
+                    "body_path": str(body_path)
+                }},
+                upsert=True
+            )
+            client.close()
+        except Exception as e:
+            logging.warning(f"[META] Error guardando metadatos en MongoDB: {e}")
+
 
 def extract_metadata_for_book(book_id: int, header: str, body_path: Path):
     meta = extract_basic(header)
