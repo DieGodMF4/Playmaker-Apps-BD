@@ -1,4 +1,3 @@
-# src/search_project/crawler/downloader.py
 from pathlib import Path
 from datetime import datetime
 import requests
@@ -11,8 +10,7 @@ USER_AGENT = "Stage1SearchEngineBot/1.0 (email@example.com)"
 
 # Markers robustos (varias formas)
 START_RE = re.compile(r"^\*\*\*\s*START OF (THIS|THE)?\s*PROJECT GUTENBERG EBOOK.*$", re.IGNORECASE | re.MULTILINE)
-END_RE   = re.compile(r"^\*\*\*\s*END OF (THIS|THE)?\s*PROJECT GUTENBERG EBOOK.*$", re.IGNORECASE | re.MULTILINE)
-
+END_RE = re.compile(r"^\*\*\*\s*END OF (THIS|THE)?\s*PROJECT GUTENBERG EBOOK.*$", re.IGNORECASE | re.MULTILINE)
 ALT_START = re.compile(r"\*\*\*\s*START OF .*PROJECT GUTENBERG.*\*\*\*", re.IGNORECASE)
 ALT_END = re.compile(r"\*\*\*\s*END OF .*PROJECT GUTENBERG.*\*\*\*", re.IGNORECASE)
 
@@ -40,16 +38,12 @@ def datalake_paths(root: Path, book_id: int, ts: datetime = None) -> Tuple[Path,
     body_path = folder / f"{book_id}.body.txt"
     return header_path, body_path
 
-def download_book(book_id: int,
-                  datalake_root: Path,
-                  control_dir: Path,
-                  alt_raw_root: Path = None,
-                  max_retries: int = 3,
-                  timeout: int = 15) -> bool:
+def download_book(book_id: int, datalake_root: Path, control_dir: Path,
+                  alt_raw_root: Path = None, max_retries: int = 3, timeout: int = 15) -> bool:
+
     control_dir.mkdir(parents=True, exist_ok=True)
     downloaded_txt = control_dir / "downloaded_books.txt"
 
-    # check already downloaded
     if downloaded_txt.exists():
         downloaded_ids = {line.strip() for line in downloaded_txt.read_text(encoding="utf-8").splitlines() if line.strip()}
         if str(book_id) in downloaded_ids:
@@ -59,46 +53,38 @@ def download_book(book_id: int,
     url = f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt"
     headers = {"User-Agent": USER_AGENT}
     last_exc = None
-
     for attempt in range(1, max_retries + 1):
         try:
             logging.info(f"[DOWNLOADER] Downloading {book_id} (attempt {attempt}) -> {url}")
             r = requests.get(url, headers=headers, timeout=timeout)
             r.raise_for_status()
             text = r.text
-
             found = _find_header_body(text)
             if not found:
                 logging.warning(f"[DOWNLOADER] Markers not found for {book_id}")
                 return False
-
             header, body = found
             header_path, body_path = datalake_paths(datalake_root, book_id)
             body_path.write_text(body, encoding="utf-8")
             header_path.write_text(header, encoding="utf-8")
 
-            # alternative raw format
             if alt_raw_root:
                 alt_raw_root.mkdir(parents=True, exist_ok=True)
                 alt_file = alt_raw_root / f"{book_id}.txt"
                 alt_file.write_text(text, encoding="utf-8")
 
-            # append to control file (avoid duplicates via check above)
             with downloaded_txt.open("a", encoding="utf-8") as f:
                 f.write(f"{book_id}\n")
-
             logging.info(f"[DOWNLOADER] Saved book {book_id} in {body_path}")
             return True
+
         except requests.RequestException as e:
             last_exc = e
             logging.warning(f"[DOWNLOADER] Request error {e} (attempt {attempt})")
             time.sleep(min(60, 2 ** attempt))
-            continue
         except Exception as e:
             last_exc = e
             logging.exception(f"[DOWNLOADER] Unexpected error {e}")
             time.sleep(min(60, 2 ** attempt))
-            continue
-
     logging.error(f"[DOWNLOADER] All attempts failed for {book_id}. Last: {last_exc}")
     return False

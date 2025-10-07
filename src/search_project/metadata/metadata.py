@@ -1,4 +1,3 @@
-# src/search_project/metadata/metadata.py
 import re
 from pathlib import Path
 import sqlite3
@@ -42,8 +41,10 @@ def save_metadata(book_id: int, meta: dict, body_path: Path):
     # save to sqlite
     conn = ensure_sqlite()
     cur = conn.cursor()
-    cur.execute("INSERT OR REPLACE INTO books (book_id, title, author, language, body_path) VALUES (?, ?, ?, ?, ?)",
-                (book_id, meta.get("title",""), meta.get("author",""), meta.get("language",""), str(body_path)))
+    cur.execute(
+        "INSERT OR REPLACE INTO books (book_id, title, author, language, body_path) VALUES (?, ?, ?, ?, ?)",
+        (book_id, meta.get("title",""), meta.get("author",""), meta.get("language",""), str(body_path))
+    )
     conn.commit()
     conn.close()
 

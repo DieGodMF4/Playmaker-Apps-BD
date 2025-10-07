@@ -1,4 +1,3 @@
-# src/search_project/utils/text_utils.py
 import re
 import unicodedata
 

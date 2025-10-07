@@ -1,16 +1,12 @@
-# src/search_project/indexer/indexer_core.py
 from pathlib import Path
 import logging
 from .indexer_db import build_index_from_paths
 from ..metadata.metadata import extract_metadata_for_book
 
-def schedule_index_for_book(book_id: int,
-                            datalake_root: Path = Path("data/datalake"),
+def schedule_index_for_book(book_id: int, datalake_root: Path = Path("data/datalake"),
                             control_dir: Path = Path("control"),
                             datamart_root: Path = Path("data/datamarts")):
-    """
-    Indexa un solo libro (solo SQLite y MongoDB).
-    """
+    """ Indexa un solo libro (solo SQLite y MongoDB). """
     for p in datalake_root.rglob(f"{book_id}.body.txt"):
         body_path = p
         header_path = p.with_name(f"{book_id}.header.txt")
