@@ -1,5 +1,5 @@
 """
-Benchmark: compara rendimiento de SQLite vs MongoDB para la metadata de libros reales.
+Benchmark: compares performance between SQLite & MongoDB for real books' metadata.
 """
 
 import time
@@ -9,6 +9,7 @@ import logging
 
 try:
     from pymongo import MongoClient
+
     MONGO_AVAILABLE = True
 except Exception:
     MONGO_AVAILABLE = False
@@ -18,6 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 # --- Rutas absolutas relativas a la raíz del proyecto ---
 PROJECT_ROOT = Path(__file__).resolve().parent.parent  # Dos niveles arriba de benchmarks/
 META_DB = PROJECT_ROOT / "data" / "datamarts" / "metadata.sqlite"
+
 
 # --- Funciones de carga ---
 def load_metadata_from_sqlite():
@@ -29,6 +31,7 @@ def load_metadata_from_sqlite():
     records = cur.fetchall()
     conn.close()
     return records
+
 
 def load_metadata_from_mongo():
     if not MONGO_AVAILABLE:
@@ -44,6 +47,7 @@ def load_metadata_from_mongo():
     except Exception as e:
         logging.warning(f"No se pudo conectar a MongoDB: {e}")
         return []
+
 
 # --- Benchmarking ---
 def benchmark_sqlite(records):
@@ -62,6 +66,7 @@ def benchmark_sqlite(records):
     conn.close()
     q1 = time.time()
     return {"engine": "sqlite", "records": len(records), "query_time": q1 - q0, "insert_time": t1 - t0}
+
 
 def benchmark_mongo(records):
     if not MONGO_AVAILABLE:
@@ -83,6 +88,7 @@ def benchmark_mongo(records):
         return {"engine": "mongodb", "records": len(records), "query_time": q1 - q0, "insert_time": t1 - t0}
     except Exception as e:
         return {"engine": "mongodb", "error": str(e)}
+
 
 # --- Main ---
 if __name__ == "__main__":

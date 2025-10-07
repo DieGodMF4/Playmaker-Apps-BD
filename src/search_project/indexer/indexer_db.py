@@ -1,8 +1,8 @@
 """
-Construye el índice invertido únicamente usando:
+Builds the inverted index using:
 - SQLite
-- MongoDB (si está disponible)
-Cada documento es un libro (book_id) y se guarda un posting list por palabra.
+- MongoDB (if available)
+Each document is one book_id; postings are stored per term.
 """
 from pathlib import Path
 import logging
@@ -18,7 +18,7 @@ except Exception:
     MONGO_AVAILABLE = False
 
 def build_index_sqlite(inverted_index, sqlite_path: Path):
-    """Crea o actualiza índice invertido en SQLite."""
+    """Create/update inverted index in SQLite (single table with JSON postings)."""
     sqlite_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(sqlite_path)
     cur = conn.cursor()
@@ -28,30 +28,41 @@ def build_index_sqlite(inverted_index, sqlite_path: Path):
             postings TEXT
         )
     """)
-    conn.commit()
+    # Bulk upserts inside a single transaction
+    to_update = []
+    to_insert = []
     for term, book_ids in inverted_index.items():
+        book_list = sorted(list(book_ids))
         cur.execute("SELECT postings FROM inverted WHERE term = ?", (term,))
         row = cur.fetchone()
         if row:
             existing = set(json.loads(row[0]) or [])
-            combined = sorted(existing | book_ids)
-            cur.execute("UPDATE inverted SET postings = ? WHERE term = ?", (json.dumps(combined), term))
+            combined = sorted(existing | set(book_list))
+            to_update.append((json.dumps(combined), term))
         else:
-            cur.execute("INSERT INTO inverted (term, postings) VALUES (?, ?)", (term, json.dumps(sorted(book_ids))))
+            to_insert.append((term, json.dumps(book_list)))
+
+    if to_update:
+        cur.executemany("UPDATE inverted SET postings = ? WHERE term = ?", to_update)
+    if to_insert:
+        cur.executemany("INSERT INTO inverted (term, postings) VALUES (?, ?)", to_insert)
+
     conn.commit()
     conn.close()
-    logging.info(f"[INDEXER] Índice SQLite actualizado en {sqlite_path}")
+    logging.info(f"[INDEXER] SQLite index updated at {sqlite_path} "
+                 f"(terms touched: {len(inverted_index)})")
 
 def build_index_mongo(inverted_index, mongo_db="search_engine", collection_name="inverted_index"):
-    """Crea o actualiza índice invertido en MongoDB."""
+    """Create/update inverted index in MongoDB."""
     if not MONGO_AVAILABLE:
-        logging.warning("[INDEXER] MongoDB no disponible; se omite.")
+        logging.warning("[INDEXER] MongoDB not available; skipping.")
         return False
     try:
         client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=2000)
         db = client[mongo_db]
         col = db[collection_name]
         col.create_index("term", unique=True)
+        # $addToSet with $each avoids duplicates
         for term, book_ids in inverted_index.items():
             col.update_one(
                 {"term": term},
@@ -59,29 +70,27 @@ def build_index_mongo(inverted_index, mongo_db="search_engine", collection_name=
                 upsert=True
             )
         client.close()
-        logging.info(f"[INDEXER] Índice MongoDB actualizado en DB={mongo_db}, colección={collection_name}")
+        logging.info(f"[INDEXER] MongoDB index updated (db={mongo_db}, col={collection_name})")
         return True
     except Exception as e:
-        logging.warning(f"[INDEXER] Error al conectar con MongoDB: {e}")
+        logging.warning(f"[INDEXER] MongoDB connection error: {e}")
         return False
 
 def build_index_from_paths(paths, datamart_root: Path = Path("data/datamarts")):
-    """Construye índice invertido solo en SQLite y MongoDB."""
+    """Incrementally update the inverted index (SQLite + optional MongoDB)."""
     datamart_root.mkdir(parents=True, exist_ok=True)
     inverted = defaultdict(set)
+
     for p in paths:
         book_id = p.stem.split(".")[0]
         try:
             text = p.read_text(encoding="utf-8")
         except Exception as e:
-            logging.warning(f"[INDEXER] Error leyendo {p}: {e}")
+            logging.warning(f"[INDEXER] Error reading {p}: {e}")
             continue
-        words = tokenize(text)
-        for w in words:
+        for w in tokenize(text, remove_stopwords=True):
             inverted[w].add(book_id)
 
-    # Guardar en SQLite
     sqlite_path = datamart_root / "inverted_index.sqlite"
     build_index_sqlite(inverted, sqlite_path)
-    # Guardar en MongoDB
     build_index_mongo(inverted)

@@ -1,6 +1,7 @@
 from pathlib import Path
 from src.search_project.crawler.downloader import download_book
 
+
 def test_download_small(tmp_path):
     # This test will attempt to download a real Gutenberg book (e.g., 1342).
     # You can mark this as integration test in CI.
