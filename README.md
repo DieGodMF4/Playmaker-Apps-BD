@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Stage 2 Microservices Scaffold
 
 Este repositorio esqueleto separa el proyecto monolítico en **4** proyectos Maven independientes:
@@ -47,3 +48,10 @@ docker compose up
   - Acceso a índices en el buscador.
 - Añadir pruebas JMH (microbenchmarks) en cada servicio.
 - Añadir persistencia (ficheros/db) y logs.
+=======
+# Search Engine - Big Data Course
+Team: _UD Playmaker Apps_
+
+For the report including all the information about the project, please visit the PDF document in the root directory:
+[Report of the Project.](https://github.com/DieGodMF4/Playmaker-Apps-BD/blob/main/BD_Playmakers_App_final_report.pdf)
+>>>>>>> 55df37deb44a66c4d17542ea2bb16f457ab1650e
