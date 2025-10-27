@@ -1,0 +1,8 @@
+ulpgc\bigd\ingestion_service\App.class
+ulpgc\bigd\ingestion_service\GutenbergDownloader$Result.class
+ulpgc\bigd\ingestion_service\GutenbergDownloader.class
+ulpgc\bigd\ingestion_service\IngestionRepository$1.class
+ulpgc\bigd\ingestion_service\IngestionRepository$Entry.class
+ulpgc\bigd\ingestion_service\IngestionRepository.class
+ulpgc\bigd\ingestion_service\GutenbergDownloader$Split.class
+ulpgc\bigd\ingestion_service\ServiceController.class
